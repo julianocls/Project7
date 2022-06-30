@@ -2,7 +2,8 @@
 //  Petitions.swift
 //  Project7
 //
-//  Created by Juliano Santos on 28/6/22.
+//  Created by Paul Hudson on 23/10/2018.
+//  Copyright © 2018 Paul Hudson. All rights reserved.
 //
 
 import Foundation
