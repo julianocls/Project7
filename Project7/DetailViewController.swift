@@ -30,7 +30,7 @@ class DetailViewController: UIViewController {
         <style> body { font-size: 150%; } </style>
         </head>
         <body>
-        \(detailItem.body)
+        \(detailItem.body.isEmpty ? detailItem.title : detailItem.body)
         </body>
         </html>
         """

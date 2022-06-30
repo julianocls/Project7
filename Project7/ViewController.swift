@@ -14,7 +14,16 @@ class ViewController: UITableViewController {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 
+        loadData()
+	}
+    
+    func loadData() {
         let urlString: String
+        
+        let btnData = UIBarButtonItem(barButtonSystemItem: .bookmarks, target: self, action: #selector(showCredits))
+        let btnSearch = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(promptFilterData))
+        let btnReload = UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(reloadData))
+        navigationItem.rightBarButtonItems = [btnReload, btnSearch, btnData]
 
         if navigationController?.tabBarItem.tag == 0 {
             // urlString = "https://api.whitehouse.gov/v1/petitions.json?limit=100"
@@ -31,8 +40,61 @@ class ViewController: UITableViewController {
             }
         }
 
-        showError()
-	}
+        showError("Loading error", "There was a problem loading the feed; please check your connection and try again.")
+    }
+    
+    @objc func reloadData() {
+            self.loadData()
+    }
+    
+    @objc func promptFilterData() {
+        let ac = UIAlertController(title: "Filter For Title", message: nil, preferredStyle: .alert)
+        ac.addTextField()
+        let filterText = UIAlertAction(title: "Confirmar", style: .default) {
+            [weak self, weak ac] action in
+            guard let text = ac?.textFields?[0].text else { return }
+            
+            self?.filterData(text)
+        }
+        
+        let cancel = UIAlertAction(title: "Cancel", style: .cancel)
+        
+        ac.addAction(filterText)
+        ac.addAction(cancel)
+        present(ac, animated: true)
+    }
+    
+    func filterData(_ filter: String){
+        var petitionsTemp = [Petition]()
+        
+        for i in petitions {
+            if i.title.contains(filter) {
+                petitionsTemp.insert(i, at: 0)
+            }
+        }
+        
+        if petitionsTemp.isEmpty {
+            showError("Not Found", "Sorry, data not found.")
+            return
+        }
+        
+        self.petitions.removeAll()
+        tableView.reloadData()
+
+        for x in petitionsTemp {
+            self.petitions.insert(x, at: 0)
+            
+            let indexPath = IndexPath(row: 0, section: 0)
+            tableView.insertRows(at: [indexPath], with: .automatic)
+        }
+
+    }
+    
+    @objc func showCredits() {
+        let vc = UIAlertController(title: "Information", message: "The data comes from the We The People API of the Whitehouse", preferredStyle: .alert)
+        vc.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(vc, animated: true)
+    }
 
     func parse(json: Data) {
         let decoder = JSONDecoder()
@@ -63,8 +125,8 @@ class ViewController: UITableViewController {
 		navigationController?.pushViewController(vc, animated: true)
 	}
 
-	func showError() {
-		let ac = UIAlertController(title: "Loading error", message: "There was a problem loading the feed; please check your connection and try again.", preferredStyle: .alert)
+    func showError(_ title: String, _ message: String) {
+		let ac = UIAlertController(title: title, message: message, preferredStyle: .alert)
 		ac.addAction(UIAlertAction(title: "OK", style: .default))
 		present(ac, animated: true)
 	}
